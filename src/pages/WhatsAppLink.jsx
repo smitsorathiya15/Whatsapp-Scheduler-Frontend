@@ -11,6 +11,7 @@ export default function WhatsAppLink() {
   const [waiting, setWaiting] = useState(false)
   const [msg, setMsg]         = useState('')
   const [unlinking, setUnlinking] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
   const pollRef               = useRef(null)
 
   /* Always verify real-time status on mount — wa_linked in DB may lag */
@@ -22,12 +23,24 @@ export default function WhatsAppLink() {
     } catch { setLinked(false) }
   }
 
-  const fetchQR = async () => {
+  const fetchQR = async (manual = false) => {
+    if (manual) setRefreshing(true)
     try {
       const d = unwrap(await whatsappAPI.qr())
-      if (d.linked) { setLinked(true); setQr(null) }
-      else setQr(d.qr ?? null)
-    } catch { }
+      if (d.linked) {
+        setLinked(true)
+        setQr(null)
+      } else {
+        setQr(d.qr ?? null)
+        // If the backend is still generating the QR, retry sooner than the 30s poll
+        if (!d.qr && d.info?.includes('Generating')) {
+          setTimeout(() => fetchQR(false), 2000)
+        }
+      }
+    } catch {
+    } finally {
+      if (manual) setRefreshing(false)
+    }
   }
 
   useEffect(() => {
@@ -125,7 +138,9 @@ export default function WhatsAppLink() {
               <button style={pg.scanBtn} onClick={handleWaitScan} disabled={waiting || !qr}>
                 {waiting ? '⏳ Waiting for scan… (up to 2 min)' : '✔ I have scanned the QR'}
               </button>
-              <button style={pg.refreshBtn} onClick={fetchQR}>🔄 Refresh QR</button>
+              <button style={pg.refreshBtn} onClick={() => fetchQR(true)} disabled={refreshing}>
+                {refreshing ? '🔄 Refreshing…' : '🔄 Refresh QR'}
+              </button>
             </div>
           </div>
         )}
