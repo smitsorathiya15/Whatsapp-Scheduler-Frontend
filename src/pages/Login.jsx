@@ -42,11 +42,11 @@ export default function Login() {
 
         <form onSubmit={handleSubmit}>
           <div style={styles.field}>
-            <label style={S.label}>Username</label>
+            <label style={S.label}>Email</label>
             <input 
               style={S.input} 
-              type="text" 
-              placeholder="Your username" 
+              type="email" 
+              placeholder="Email" 
               value={form.username} 
               onChange={set('username')} 
               required 
