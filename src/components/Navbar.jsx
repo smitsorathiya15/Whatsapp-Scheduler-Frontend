@@ -22,7 +22,7 @@ export default function Navbar() {
       </div>
 
       <div style={styles.links}>
-        <Link to="/" style={active('/')}>Dashboard</Link>
+        <Link to="/dashboard" style={active('/dashboard')}>Dashboard</Link>
         <Link to="/whatsapp-link" style={active('/whatsapp-link')}>
           WhatsApp Link
           {/* Live per-user status dot — green = linked, red = not linked */}

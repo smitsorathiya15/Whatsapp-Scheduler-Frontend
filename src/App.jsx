@@ -19,9 +19,10 @@ export default function App() {
     <>
       {user && <Navbar />}
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+        <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/login" element={user ? <Navigate to="/dashboard" replace /> : <Login />} />
+        <Route path="/register" element={user ? <Navigate to="/dashboard" replace /> : <Register />} />
+        <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
         <Route path="/whatsapp-link" element={<PrivateRoute><WhatsAppLink /></PrivateRoute>} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
