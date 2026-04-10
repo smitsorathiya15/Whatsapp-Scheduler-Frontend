@@ -13,6 +13,15 @@ export default function WhatsAppLink() {
   const [unlinking, setUnlinking] = useState(false)
   const [refreshing, setRefreshing] = useState(false)
   const pollRef               = useRef(null)
+  const retryRef              = useRef(null)
+  const qrRequestRef          = useRef(false)
+
+  const clearRetry = () => {
+    if (retryRef.current) {
+      clearTimeout(retryRef.current)
+      retryRef.current = null
+    }
+  }
 
   /* Always verify real-time status on mount — wa_linked in DB may lag */
   const fetchStatus = async () => {
@@ -24,21 +33,31 @@ export default function WhatsAppLink() {
   }
 
   const fetchQR = async (manual = false) => {
+    if (qrRequestRef.current) return
+    qrRequestRef.current = true
+    clearRetry()
     if (manual) setRefreshing(true)
     try {
       const d = unwrap(await whatsappAPI.qr())
       if (d.linked) {
         setLinked(true)
         setQr(null)
+        clearRetry()
       } else {
+        setLinked(false)
         setQr(d.qr ?? null)
         // If the backend is still generating the QR, retry sooner than the 30s poll
         if (!d.qr && d.info?.includes('Generating')) {
-          setTimeout(() => fetchQR(false), 2000)
+          retryRef.current = setTimeout(() => {
+            retryRef.current = null
+            fetchQR(false)
+          }, 2000)
         }
       }
-    } catch {
+    } catch (err) {
+      setMsg('QR load failed. ' + unwrapError(err))
     } finally {
+      qrRequestRef.current = false
       if (manual) setRefreshing(false)
     }
   }
@@ -46,7 +65,10 @@ export default function WhatsAppLink() {
   useEffect(() => {
     fetchStatus()
     pollRef.current = setInterval(fetchQR, 30_000)
-    return () => clearInterval(pollRef.current)
+    return () => {
+      clearInterval(pollRef.current)
+      clearRetry()
+    }
   }, [])
 
   const handleWaitScan = async () => {
