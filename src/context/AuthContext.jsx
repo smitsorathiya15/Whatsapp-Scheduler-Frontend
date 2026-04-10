@@ -23,9 +23,15 @@ export function AuthProvider({ children }) {
     setUser(data.user)
   }
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    setUser(null)
+  const logout = async () => {
+    try {
+      await authAPI.logout()
+    } catch {
+      // Clear local auth state even if the backend is already unavailable.
+    } finally {
+      localStorage.removeItem('token')
+      setUser(null)
+    }
   }
 
   return (

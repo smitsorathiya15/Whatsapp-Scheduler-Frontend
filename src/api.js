@@ -34,6 +34,7 @@ export const unwrapError = (err) => {
 export const authAPI = {
   register: (data) => api.post('/user/v1/auth/register', data),
   login:    (data) => api.post('/user/v1/auth/login',    data),
+  logout:   ()     => api.post('/user/v1/auth/logout'),
   me:       ()     => api.get('/user/v1/auth/me'),
 }
 

@@ -8,7 +8,10 @@ export default function Navbar() {
   const navigate         = useNavigate()
   const location         = useLocation()
 
-  const handleLogout = () => { logout(); navigate('/login') }
+  const handleLogout = async () => {
+    await logout()
+    navigate('/login')
+  }
   const active = (path) => location.pathname === path ? styles.activeLink : styles.link
 
   return (
