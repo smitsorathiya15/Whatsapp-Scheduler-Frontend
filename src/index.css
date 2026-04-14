@@ -18,3 +18,8 @@ button {
   cursor: pointer;
   font-family: inherit;
 }
+
+@keyframes progress-slide {
+  0%   { transform: translateX(-250%); }
+  100% { transform: translateX(600%); }
+}
